@@ -1,5 +1,5 @@
 export class DataService {
-    getUsers() {
+    getUsers(): Promise<any[]> {
         return Promise.resolve([
             {
                 id: 1,
@@ -234,7 +234,7 @@ export class DataService {
         ]);
     }
 
-    getPosts() {
+    getPosts(): Promise<any[]> {
         return Promise.resolve([
             {
                 userId: 1,
@@ -939,7 +939,7 @@ export class DataService {
         ]);
     }
 
-    getComments() {
+    getComments(): Promise<any[]> {
         return Promise.resolve([
             {
                 postId: 8,
