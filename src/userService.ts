@@ -1,12 +1,12 @@
 import {DataService} from './dataService';
-import {Comment, Post, User} from './models';
+import {Comment, Post, User, UserWithPosts} from './models';
 import {isUnique} from './utils';
 
 export class UserService {
     constructor(private dataService: DataService) {
     }
 
-    async getUsersWithPopularPosts(commentThreshold: number): Promise<User[]> {
+    async getUsersWithPopularPosts(commentThreshold: number): Promise<UserWithPosts[]> {
         let users = await this.dataService.getUsers();
         let posts = await this.dataService.getPosts();
         let comments = await this.dataService.getComments();
@@ -17,7 +17,7 @@ export class UserService {
 
         let popularUsers = popularPostUserIds
             .filter(isUnique(popularPostUserIds))
-            .map(userId => this.getUser(userId, users));
+            .map(userId => this.getUserWithPosts(userId, users, posts));
 
         return Promise.resolve(popularUsers);
     }
@@ -28,7 +28,11 @@ export class UserService {
             .length >= commentThreshold;
     }
 
-    private getUser(userId: number, users: User[]): User {
-        return users.find(user => user.id === userId)!;
+    private getUserWithPosts(userId: number, users: User[], posts: Post[]): UserWithPosts {
+        const user = users.find(user => user.id === userId)!;
+        return {
+            ...user,
+            posts: posts.filter(post => post.userId === userId)
+        };
     }
 }

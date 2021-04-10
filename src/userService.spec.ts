@@ -2,17 +2,17 @@ import {describe, it} from 'mocha';
 import {expect} from 'chai';
 import {UserService} from './userService';
 import {DataService} from './dataService';
-import {Comment, Post, User} from './models';
+import {Comment, Post, User, UserWithPosts} from './models';
 
 
 describe('UserService', () => {
-    const commentThreshold = 2;
+    const twoCommentThreshold = 2;
     it('no data', async () => {
         const mockDataService: DataService = getMockDataService([], [], []);
 
         const userService = new UserService(mockDataService);
 
-        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(commentThreshold);
+        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(twoCommentThreshold);
 
         expect(usersWithPopularPosts).to.have.length(0);
     });
@@ -26,7 +26,7 @@ describe('UserService', () => {
 
         const userService = new UserService(mockDataService);
 
-        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(commentThreshold);
+        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(twoCommentThreshold);
 
         expect(usersWithPopularPosts).to.have.length(0);
     });
@@ -40,7 +40,7 @@ describe('UserService', () => {
 
         const userService = new UserService(mockDataService);
 
-        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(commentThreshold);
+        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(twoCommentThreshold);
 
         expect(usersWithPopularPosts).to.have.length(0);
     });
@@ -54,45 +54,45 @@ describe('UserService', () => {
 
         const userService = new UserService(mockDataService);
 
-        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(commentThreshold);
+        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(twoCommentThreshold);
 
         expect(usersWithPopularPosts).to.have.length(0);
     });
 
     it('comments on threshold', async () => {
-        const expectedUsers = [{id: 1}];
+        const expectedUsers: UserWithPosts[] = [{id: 1, posts: [{id: 10, userId: 1}]}];
         const mockDataService: DataService = getMockDataService(
-            expectedUsers,
+            [{id: 1}],
             [{id: 10, userId: 1}],
             [{id: 100, postId: 10}, {id: 101, postId: 10}]
         );
 
         const userService = new UserService(mockDataService);
 
-        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(commentThreshold);
+        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(twoCommentThreshold);
 
         expect(usersWithPopularPosts).to.deep.equal(expectedUsers);
     });
 
     it('comments above threshold', async () => {
-        const expectedUsers = [{id: 1}];
+        const expectedUsers: UserWithPosts[] = [{id: 1, posts: [{id: 10, userId: 1}]}];
         const mockDataService: DataService = getMockDataService(
-            expectedUsers,
+            [{id: 1}],
             [{id: 10, userId: 1}],
             [{id: 100, postId: 10}, {id: 101, postId: 10}, {id: 102, postId: 10}]
         );
 
         const userService = new UserService(mockDataService);
 
-        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(commentThreshold);
+        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(twoCommentThreshold);
 
         expect(usersWithPopularPosts).to.deep.equal(expectedUsers);
     });
 
     it('multiple posts, one user', async () => {
-        const expectedUsers = [{id: 1}];
+        const expectedUsers: UserWithPosts[] = [{id: 1, posts: [{id: 10, userId: 1}, {id: 20, userId: 1}]}];
         const mockDataService: DataService = getMockDataService(
-            expectedUsers,
+            [{id: 1}],
             [{id: 10, userId: 1}, {id: 20, userId: 1}],
             [{id: 100, postId: 10}, {id: 101, postId: 10},
                 {id: 102, postId: 20}, {id: 103, postId: 20}]
@@ -100,7 +100,23 @@ describe('UserService', () => {
 
         const userService = new UserService(mockDataService);
 
-        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(commentThreshold);
+        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(twoCommentThreshold);
+
+        expect(usersWithPopularPosts).to.deep.equal(expectedUsers);
+    });
+
+    it('user should also contain unpopular posts', async () => {
+        const expectedUsers: UserWithPosts[] = [{id: 1, posts: [{id: 10, userId: 1}, {id: 20, userId: 1}]}];
+        const mockDataService: DataService = getMockDataService(
+            [{id: 1}],
+            [{id: 10, userId: 1}, {id: 20, userId: 1}],
+            [{id: 100, postId: 10}, {id: 101, postId: 10},
+                {id: 102, postId: 20}]
+        );
+
+        const userService = new UserService(mockDataService);
+
+        const usersWithPopularPosts = await userService.getUsersWithPopularPosts(twoCommentThreshold);
 
         expect(usersWithPopularPosts).to.deep.equal(expectedUsers);
     });

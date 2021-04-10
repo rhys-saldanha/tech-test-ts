@@ -11,3 +11,7 @@ export interface Comment {
     id: number,
     postId: number,
 }
+
+export interface UserWithPosts extends User {
+    posts: Post[]
+}
